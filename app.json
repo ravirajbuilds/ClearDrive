@@ -1,22 +1,48 @@
 {
   "expo": {
-    "name": "cd-base",
-    "slug": "cd-base",
+    "name": "ClearDrive",
+    "slug": "cleardrive",
     "version": "1.0.0",
+    "description": "Water quality for New Jersey — official monitoring readings and community samples for local rivers, lakes, bays, and beaches. For general information only.",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "cdbase",
+    "scheme": "cleardrive",
     "userInterfaceStyle": "automatic",
+    "primaryColor": "#0A7EA4",
+    "backgroundColor": "#F4F8FA",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "app.cleardrive.mobile",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "ClearDrive uses your location only on your device to show nearby water bodies and to optionally prefill coordinates when you submit a sample. Your location is never uploaded.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ],
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyTracking": false
+      }
     },
     "android": {
+      "package": "app.cleardrive.mobile",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#E1F0F6",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"],
+      "blockedPermissions": ["ACCESS_BACKGROUND_LOCATION"],
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -31,7 +57,18 @@
         {
           "image": "./assets/images/splash-icon.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#F4F8FA",
+          "dark": {
+            "backgroundColor": "#0B1519"
+          }
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "ClearDrive uses your location only on your device to show nearby water bodies and to optionally prefill coordinates when you submit a sample. Your location is never uploaded.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
         }
       ]
     ],

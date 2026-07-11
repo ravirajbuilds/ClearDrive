@@ -1,10 +1,12 @@
 import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
+import { DisclaimerProvider, useDisclaimer } from '@/hooks/useDisclaimer';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -12,11 +14,10 @@ export {
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Prevent the splash screen from auto-hiding before asset + consent loading completes.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -29,27 +30,53 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
   if (!loaded) {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <DisclaimerProvider>
+        <RootLayoutNav />
+      </DisclaimerProvider>
+    </GestureHandlerRootView>
+  );
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { accepted } = useDisclaimer();
+  const segments = useSegments();
+  const router = useRouter();
+
+  // Gate the app behind the safety disclaimer until it has been accepted.
+  useEffect(() => {
+    if (accepted === null) return; // still loading consent state
+    SplashScreen.hideAsync().catch(() => {});
+
+    const onOnboarding = segments[0] === 'onboarding';
+    if (!accepted && !onOnboarding) {
+      router.replace('/onboarding');
+    } else if (accepted && onOnboarding) {
+      router.replace('/(tabs)');
+    }
+  }, [accepted, segments, router]);
+
+  // Hold on the splash until consent state is known to avoid a flash of the app.
+  if (accepted === null) {
+    return null;
+  }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="water-body/[id]" options={{ headerShown: true, title: '' }} />
+        <Stack.Screen
+          name="legal/[doc]"
+          options={{ headerShown: true, presentation: 'card', title: '' }}
+        />
       </Stack>
     </ThemeProvider>
   );
