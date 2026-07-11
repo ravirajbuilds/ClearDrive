@@ -1,6 +1,7 @@
 import type {
   Classification,
   Measurement,
+  ParameterBand,
   ParameterId,
   WaterQualityAssessment,
   WqStatus,
@@ -34,19 +35,22 @@ export const STATUS_SUMMARY: Record<WqStatus, string> = {
 };
 
 /**
- * Classify a single measurement value against its parameter's reference bands.
- * Returns `unknown` for informational-only parameters, unclassifiable values,
- * or unknown parameters.
+ * Classify a value against an ordered set of reference bands. Shared by both the
+ * surface-water and home drinking-water parameter sets. Returns `unknown` for
+ * informational-only parameters and unclassifiable values.
  */
-export function classify(parameter: ParameterId, value: number): Classification {
-  const def = PARAMETERS[parameter];
-  if (!def || def.informationalOnly || def.bands.length === 0) {
+export function classifyBands(
+  bands: ParameterBand[],
+  value: number,
+  informationalOnly = false,
+): Classification {
+  if (informationalOnly || bands.length === 0) {
     return { status: 'unknown', label: 'Informational' };
   }
   if (!Number.isFinite(value)) {
     return { status: 'unknown', label: 'No data' };
   }
-  for (const band of def.bands) {
+  for (const band of bands) {
     const aboveMin = band.min === undefined || value >= band.min;
     const belowMax = band.max === undefined || value < band.max;
     if (aboveMin && belowMax) {
@@ -54,6 +58,31 @@ export function classify(parameter: ParameterId, value: number): Classification 
     }
   }
   return { status: 'unknown', label: 'Out of reference range' };
+}
+
+/**
+ * Classify a single measurement value against its parameter's reference bands.
+ * Returns `unknown` for informational-only parameters, unclassifiable values,
+ * or unknown parameters.
+ */
+export function classify(parameter: ParameterId, value: number): Classification {
+  const def = PARAMETERS[parameter];
+  if (!def) {
+    return { status: 'unknown', label: 'Informational' };
+  }
+  return classifyBands(def.bands, value, def.informationalOnly);
+}
+
+/** Reduce a set of statuses to the single worst (most severe) classifiable one. */
+export function overallStatus(statuses: WqStatus[]): WqStatus {
+  let worst: WqStatus = 'unknown';
+  for (const s of statuses) {
+    if (s === 'unknown') continue;
+    if (worst === 'unknown' || SEVERITY[s] > SEVERITY[worst]) {
+      worst = s;
+    }
+  }
+  return worst;
 }
 
 /**

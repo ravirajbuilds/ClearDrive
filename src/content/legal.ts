@@ -13,7 +13,7 @@
 export const APP_NAME = 'ClearDrive';
 export const OPERATOR_NAME = 'the ClearDrive team';
 export const CONTACT_EMAIL = 'support@cleardrive.app';
-export const LAST_UPDATED = 'July 1, 2026';
+export const LAST_UPDATED = 'July 11, 2026';
 
 /** One-line disclaimer shown on data surfaces throughout the app. */
 export const SHORT_DISCLAIMER =
@@ -27,12 +27,27 @@ export const SAFETY_DISCLAIMER_POINTS: string[] = [
   'Do not use ClearDrive to decide whether water is safe to drink, swim in, fish from, or use in any other way. Water conditions can change rapidly and a single reading cannot capture that.',
   'Official readings come from public sources such as the USGS and are provided "as is." They may be delayed, incomplete, or superseded. Some values shown are illustrative sample data, clearly labeled as such.',
   'Community samples are submitted by members of the public. They are unverified, may be inaccurate, and are not endorsed by ClearDrive or any agency.',
+  'Home water tests you log use screening tools (strips, meters, kits) that are not lab-grade. They cannot tell you whether your tap water is safe — lead and PFAS require a certified laboratory.',
   'In an emergency, or if you suspect a spill, illegal discharge, or a health hazard, contact the NJDEP hotline at 1-877-WARNDEP (1-877-927-6337) or call 911.',
 ];
 
 /** Short disclaimer specific to community-submitted data. */
 export const COMMUNITY_DISCLAIMER =
   'Community samples are crowdsourced and unverified. They may be inaccurate or incomplete and are not reviewed or endorsed by ClearDrive or any government agency.';
+
+/** Short disclaimer shown on the home tap-water testing surfaces. */
+export const HOME_WATER_DISCLAIMER =
+  'Home test strips and kits are screening tools, not lab tests. This does not tell you whether your tap water is safe. Lead and PFAS need a certified lab. Contact your water utility and NJDEP.';
+
+/** Longer points shown on the home tap-water intro and legal section. */
+export const HOME_WATER_POINTS: string[] = [
+  'Home test strips, TDS meters, and mail-in kits are screening tools. Their accuracy varies and they are not a substitute for analysis by a certified laboratory.',
+  'This feature cannot tell you whether your tap water is safe to drink. It records your own readings for your reference only.',
+  'Lead and PFAS in particular require accredited laboratory testing to measure reliably. Do not rely on a home strip for these.',
+  'For an official picture of your water, read your utility’s annual Consumer Confidence Report (CCR) and, if you have concerns, arrange testing through a New Jersey certified laboratory.',
+  'Questions about drinking water can go to the EPA Safe Drinking Water Hotline at 1-800-426-4791 or your local health department.',
+  'Not all filters remove all contaminants. Effectiveness depends on the filter type, its certification (look for NSF/ANSI standards), and whether it is maintained and replaced on schedule.',
+];
 
 /** Short disclaimer specific to reference ranges / status badges. */
 export const STATUS_DISCLAIMER =
@@ -69,6 +84,13 @@ export const DISCLAIMER_SECTIONS: LegalSection[] = [
     body: [
       'Official data is retrieved from third-party public services (such as the USGS) and is provided on an "as is" and "as available" basis. It may be delayed, interrupted, incomplete, or contain errors outside our control. Some readings are illustrative sample data included for demonstration and offline use, and are labeled accordingly.',
       'Community samples are unverified and may be inaccurate. We do not independently confirm them.',
+    ],
+  },
+  {
+    heading: 'Home tap-water tests',
+    body: [
+      'The home water testing feature lets you record readings from consumer test strips, meters, or mail-in kits. These are screening tools, not accredited laboratory analyses, and their accuracy varies widely.',
+      'Nothing in this feature tells you whether your tap water is safe to drink. Lead and PFAS in particular cannot be measured reliably with home strips and require a certified laboratory. For an official picture, consult your water utility’s Consumer Confidence Report and, if concerned, use a New Jersey certified lab or call the EPA Safe Drinking Water Hotline at 1-800-426-4791.',
     ],
   },
   {
@@ -199,6 +221,18 @@ export const DATA_SOURCES: DataSource[] = [
     description:
       'Federal water-quality criteria and guidance used to inform the simplified reference ranges in this app.',
     url: 'https://www.epa.gov/wqc',
+  },
+  {
+    name: 'US EPA Ground Water & Drinking Water (incl. PFAS)',
+    description:
+      'Federal drinking-water regulations, the 2024 PFAS limits, and the Safe Drinking Water Hotline (1-800-426-4791) used for the home tap-water reference ranges.',
+    url: 'https://www.epa.gov/ground-water-and-drinking-water',
+  },
+  {
+    name: 'NJDEP Division of Water Supply & Geoscience',
+    description:
+      'New Jersey drinking-water standards, including the state PFAS maximum contaminant levels, and certified-laboratory information.',
+    url: 'https://dep.nj.gov/watersupply/',
   },
 ];
 

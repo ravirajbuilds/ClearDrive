@@ -20,8 +20,13 @@ and React Native, targeting iOS and Android from one TypeScript codebase.
 - **Water-body detail** — latest official readings with per-parameter status
   against simplified reference ranges, pull-to-refresh, and clear source
   attribution (live USGS, cached, or bundled sample data).
-- **Report** — submit a crowdsourced water sample. Samples are validated,
-  stored on-device, and always labeled unverified.
+- **Report** — submit a crowdsourced surface-water sample tied to a water body.
+  Samples are validated, stored on-device, and always labeled unverified.
+- **My Water** — log home tap-water tests from strips, meters, or mail-in kits,
+  including PFAS, lead, copper, nitrate, pH, chlorine, turbidity, TDS, hardness,
+  iron, and fluoride, together with the filter used. Readings are classified
+  against simplified *drinking-water* reference ranges (EPA/NJ), stored on-device,
+  and wrapped in strong health disclaimers (lead and PFAS require a certified lab).
 - **About / Legal** — safety disclaimer, privacy policy, terms of use, and data
   source attribution, plus environmental-hazard reporting contacts.
 - A one-time **safety disclaimer gate** that must be accepted before use, with a
@@ -47,17 +52,18 @@ npx expo export --platform web   # verify the bundle builds
 app/                       expo-router routes
   _layout.tsx              root layout + disclaimer gate
   onboarding.tsx           safety disclaimer acceptance screen
-  (tabs)/                  Nearby, Explore, Report, About
+  (tabs)/                  Nearby, Explore, Report, My Water, About
   water-body/[id].tsx      water-body detail
+  home-test.tsx            home tap-water test form
   legal/[doc].tsx          disclaimer / privacy / terms / sources
 components/                shared UI (cards, badges, states, rows)
   ui/                      primitives (Button, Card, Chip, StatusBadge, …)
-hooks/                     useTheme, useNow, useDisclaimer, useWaterBodyList
+hooks/                     useTheme, useNow, useDisclaimer, useWaterBodyList, useHomeTests
 constants/                 Colors, Layout tokens
 src/
-  data/                    models, parameter thresholds, NJ seed dataset
-  services/                storage, samples, officialApi (USGS), location, disclaimer
-  utils/                   waterQuality classification, geo, formatting
+  data/                    models, parameter thresholds, NJ seed dataset, homeWater
+  services/                storage, samples, homeTests, officialApi (USGS), location, disclaimer
+  utils/                   waterQuality + homeWater classification, geo, formatting
   content/legal.ts         all legal / disclaimer / attribution copy
 ```
 

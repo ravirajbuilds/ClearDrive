@@ -57,6 +57,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="mywater"
+        options={{
+          title: 'My Water',
+          tabBarIcon: ({ color }) => (
+            <TabIcon
+              name={{ ios: 'testtube.2', android: 'science', web: 'science' }}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="about"
         options={{
           title: 'About',

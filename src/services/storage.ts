@@ -11,6 +11,7 @@ const PREFIX = 'cleardrive:';
 export const StorageKeys = {
   disclaimerAccepted: 'disclaimer_accepted_version',
   communitySamples: 'community_samples',
+  homeWaterTests: 'home_water_tests',
   cachedOfficial: 'cached_official',
   settings: 'settings',
 } as const;

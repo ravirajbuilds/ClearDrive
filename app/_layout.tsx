@@ -74,6 +74,10 @@ function RootLayoutNav() {
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
         <Stack.Screen name="water-body/[id]" options={{ headerShown: true, title: '' }} />
         <Stack.Screen
+          name="home-test"
+          options={{ headerShown: true, presentation: 'card', title: 'Home water test' }}
+        />
+        <Stack.Screen
           name="legal/[doc]"
           options={{ headerShown: true, presentation: 'card', title: '' }}
         />
