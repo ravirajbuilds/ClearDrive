@@ -17,6 +17,9 @@ and React Native, targeting iOS and Android from one TypeScript codebase.
 - **Nearby** — browse NJ water bodies, optionally sorted by distance using
   on-device location (entirely optional; the app works without it).
 - **Explore** — search by name/town/county and filter by water-body type.
+- **Map** — an interactive [Mapbox](https://www.mapbox.com/) map of every NJ
+  water body, with markers colored by water-quality status; tap a marker to open
+  its detail. The water-body detail screen also shows a focused location map.
 - **Water-body detail** — latest official readings with per-parameter status
   against simplified reference ranges, pull-to-refresh, and clear source
   attribution (live USGS, cached, or bundled sample data).
@@ -38,6 +41,22 @@ and React Native, targeting iOS and Android from one TypeScript codebase.
 npm install
 npx expo start        # then press i / a / w, or scan the QR code
 ```
+
+### Map (Mapbox) setup
+
+The Map tab and the water-body detail map use Mapbox GL JS (directly on web, and
+inside a WebView on native). Provide a free Mapbox **public** access token so
+tiles render:
+
+```bash
+cp .env.example .env
+# then set EXPO_PUBLIC_MAPBOX_TOKEN=pk.your_token in .env
+```
+
+Create a token at https://account.mapbox.com/access-tokens/. The token is a
+public, URL-restrictable client token (safe to ship in a client app). Without a
+token the app degrades gracefully — the map area shows a "Map unavailable"
+message and every water body stays browsable from the Nearby and Explore tabs.
 
 Useful scripts:
 

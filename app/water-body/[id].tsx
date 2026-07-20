@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 
+import WaterMap from '@/components/WaterMap';
 import { ParameterRow } from '@/components/ParameterRow';
 import { SampleCard } from '@/components/SampleCard';
 import { Button } from '@/components/ui/Button';
@@ -13,7 +14,7 @@ import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
 import { AppErrorBoundary } from '@/components/AppErrorBoundary';
 import { useTheme } from '@/hooks/useTheme';
 import { useNow } from '@/hooks/useNow';
-import { FontSize, Spacing } from '@/constants/Layout';
+import { FontSize, Radius, Spacing } from '@/constants/Layout';
 import { getWaterBody } from '@/src/data/waterBodies';
 import { WATER_BODY_TYPE_LABEL } from '@/src/data/labels';
 import type { CommunitySample } from '@/src/data/models';
@@ -26,7 +27,7 @@ import { COMMUNITY_DISCLAIMER, STATUS_DISCLAIMER } from '@/src/content/legal';
 
 export default function WaterBodyDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors } = useTheme();
+  const { colors, scheme } = useTheme();
   const router = useRouter();
   const now = useNow();
 
@@ -126,6 +127,25 @@ export default function WaterBodyDetailScreen() {
           </Text>
         </View>
 
+        {/* Location map */}
+        <View style={[styles.mapWrap, { borderColor: colors.border }]}>
+          <WaterMap
+            points={[
+              {
+                id: waterBody.id,
+                name: waterBody.name,
+                typeLabel: WATER_BODY_TYPE_LABEL[waterBody.type],
+                status: assess(waterBody.officialMeasurements).status,
+                latitude: waterBody.latitude,
+                longitude: waterBody.longitude,
+                sampleCount: 0,
+              },
+            ]}
+            colorScheme={scheme}
+            focusPoint={{ latitude: waterBody.latitude, longitude: waterBody.longitude }}
+          />
+        </View>
+
         {/* Official data */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Latest readings</Text>
         {loadingOfficial ? (
@@ -220,6 +240,12 @@ const styles = StyleSheet.create({
   header: {
     gap: Spacing.xs,
     marginBottom: Spacing.sm,
+  },
+  mapWrap: {
+    height: 180,
+    borderRadius: Radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    overflow: 'hidden',
   },
   name: {
     fontSize: FontSize.xxl,
