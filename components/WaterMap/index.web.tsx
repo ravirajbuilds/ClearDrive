@@ -1,19 +1,17 @@
 /**
- * Web implementation of the water-body map, powered by Mapbox GL JS rendering
+ * Web implementation of the water-body map, powered by MapLibre GL JS rendering
  * directly into the DOM. On web, a react-native-web `View` ref resolves to the
- * underlying DOM element, which Mapbox uses as its container.
+ * underlying DOM element, which MapLibre uses as its container. MapLibre needs
+ * no access token.
  */
 import { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 
-import { MapPlaceholder } from './MapPlaceholder';
 import {
-  MAPBOX_TOKEN,
   NJ_CENTER,
-  hasMapboxToken,
-  mapStyleUrl,
+  mapStyle,
   markerColor,
   type WaterMapProps,
 } from './shared';
@@ -38,29 +36,27 @@ export default function WaterMap({
   focusPoint,
 }: WaterMapProps) {
   const containerRef = useRef<View>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
   // Keep the latest callback without re-creating markers on every render.
   const selectRef = useRef(onSelectPoint);
   selectRef.current = onSelectPoint;
 
   // Create the map once.
   useEffect(() => {
-    if (!hasMapboxToken()) return;
     const node = containerRef.current as unknown as HTMLElement | null;
     if (!node || mapRef.current) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
-    const map = new mapboxgl.Map({
+    const map = new maplibregl.Map({
       container: node,
-      style: mapStyleUrl(colorScheme),
+      style: mapStyle(colorScheme),
       center: focusPoint
         ? [focusPoint.longitude, focusPoint.latitude]
         : [NJ_CENTER.longitude, NJ_CENTER.latitude],
       zoom: focusPoint ? 12 : NJ_CENTER.zoom,
-      attributionControl: true,
+      attributionControl: { compact: true },
     });
-    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     mapRef.current = map;
 
     return () => {
@@ -74,7 +70,7 @@ export default function WaterMap({
 
   // Follow the active color scheme.
   useEffect(() => {
-    mapRef.current?.setStyle(mapStyleUrl(colorScheme));
+    mapRef.current?.setStyle(mapStyle(colorScheme));
   }, [colorScheme]);
 
   // Sync markers whenever the points, focus, or scheme change.
@@ -90,7 +86,7 @@ export default function WaterMap({
       const el = makeMarkerEl(markerColor(p.status, colorScheme), ring);
       el.setAttribute('aria-label', `${p.name}, ${p.typeLabel}`);
       el.addEventListener('click', () => selectRef.current?.(p.id));
-      const marker = new mapboxgl.Marker({ element: el })
+      const marker = new maplibregl.Marker({ element: el })
         .setLngLat([p.longitude, p.latitude])
         .addTo(map);
       markersRef.current.push(marker);
@@ -100,16 +96,12 @@ export default function WaterMap({
       const el = makeMarkerEl('#2F80ED', ring);
       el.style.width = '14px';
       el.style.height = '14px';
-      const marker = new mapboxgl.Marker({ element: el })
+      const marker = new maplibregl.Marker({ element: el })
         .setLngLat([userLocation.longitude, userLocation.latitude])
         .addTo(map);
       markersRef.current.push(marker);
     }
   }, [points, userLocation, colorScheme]);
-
-  if (!hasMapboxToken()) {
-    return <MapPlaceholder />;
-  }
 
   return <View ref={containerRef} style={styles.map} />;
 }

@@ -17,7 +17,7 @@ and React Native, targeting iOS and Android from one TypeScript codebase.
 - **Nearby** — browse NJ water bodies, optionally sorted by distance using
   on-device location (entirely optional; the app works without it).
 - **Explore** — search by name/town/county and filter by water-body type.
-- **Map** — an interactive [Mapbox](https://www.mapbox.com/) map of every NJ
+- **Map** — an interactive [MapLibre](https://maplibre.org/) map of every NJ
   water body, with markers colored by water-quality status; tap a marker to open
   its detail. The water-body detail screen also shows a focused location map.
 - **Water-body detail** — latest official readings with per-parameter status
@@ -42,21 +42,26 @@ npm install
 npx expo start        # then press i / a / w, or scan the QR code
 ```
 
-### Map (Mapbox) setup
+### Map (MapLibre) setup
 
-The Map tab and the water-body detail map use Mapbox GL JS (directly on web, and
-inside a WebView on native). Provide a free Mapbox **public** access token so
-tiles render:
+The Map tab and the water-body detail map use [MapLibre GL JS](https://maplibre.org/)
+— the open-source fork of Mapbox GL JS — directly on web and inside a WebView on
+native. **No access token or account is required**: the default basemap uses
+tokenless CARTO raster tiles (© OpenStreetMap contributors © CARTO) with
+light/dark variants that follow the app theme, so the map just works after
+`npm install`.
+
+To use your own vector basemap instead (e.g. a MapTiler or Stadia Maps style),
+set an optional style URL:
 
 ```bash
 cp .env.example .env
-# then set EXPO_PUBLIC_MAPBOX_TOKEN=pk.your_token in .env
+# then set EXPO_PUBLIC_MAP_STYLE_URL=https://…/style.json in .env
 ```
 
-Create a token at https://account.mapbox.com/access-tokens/. The token is a
-public, URL-restrictable client token (safe to ship in a client app). Without a
-token the app degrades gracefully — the map area shows a "Map unavailable"
-message and every water body stays browsable from the Nearby and Explore tabs.
+The default CARTO basemap is fine for development and low-volume use; for a
+production launch, review the tile provider's usage policy and consider your own
+style/tiles.
 
 Useful scripts:
 

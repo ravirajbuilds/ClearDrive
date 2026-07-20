@@ -1,11 +1,17 @@
 /**
- * Shared, platform-agnostic pieces for the Mapbox water-body map.
+ * Shared, platform-agnostic pieces for the MapLibre water-body map.
  *
  * The map renders every NJ water body as a status-colored marker. Both the web
- * (Mapbox GL JS) and native (Mapbox GL JS inside a WebView) implementations use
- * the same point shape, marker colors, and Mapbox style so the visualization
+ * (MapLibre GL JS) and native (MapLibre GL JS inside a WebView) implementations
+ * use the same point shape, marker colors, and map style so the visualization
  * looks and behaves identically across platforms.
+ *
+ * MapLibre is the open-source fork of Mapbox GL JS and needs no access token.
+ * The default basemap uses tokenless CARTO raster tiles (© OpenStreetMap
+ * contributors © CARTO) with light/dark variants that follow the app theme.
  */
+
+import type { StyleSpecification } from 'maplibre-gl';
 
 import { StatusColors, type ColorScheme } from '@/constants/Colors';
 import type { WqStatus } from '@/src/data/models';
@@ -34,25 +40,43 @@ export interface WaterMapProps {
 }
 
 /**
- * The Mapbox public access token, read from the `EXPO_PUBLIC_MAPBOX_TOKEN`
- * environment variable (Expo inlines `EXPO_PUBLIC_*` at build time). Empty when
- * unset, in which case the map renders a friendly "token required" state instead
- * of crashing.
+ * Optional custom MapLibre style URL (e.g. a MapTiler/Stadia vector style). Read
+ * from `EXPO_PUBLIC_MAP_STYLE_URL`; when unset the built-in CARTO raster style is
+ * used, so the map works with zero configuration.
  */
-export const MAPBOX_TOKEN: string = process.env.EXPO_PUBLIC_MAPBOX_TOKEN ?? '';
-
-export function hasMapboxToken(): boolean {
-  return MAPBOX_TOKEN.trim().length > 0;
-}
+export const MAP_STYLE_OVERRIDE: string = process.env.EXPO_PUBLIC_MAP_STYLE_URL ?? '';
 
 /** Default view centered on New Jersey. */
 export const NJ_CENTER = { longitude: -74.45, latitude: 40.1, zoom: 6.7 } as const;
 
-/** Mapbox style URL for the active color scheme. */
-export function mapStyleUrl(scheme: ColorScheme): string {
-  return scheme === 'dark'
-    ? 'mapbox://styles/mapbox/dark-v11'
-    : 'mapbox://styles/mapbox/light-v11';
+const CARTO_ATTRIBUTION = '© OpenStreetMap contributors © CARTO';
+
+function cartoTiles(variant: 'light_all' | 'dark_all'): string[] {
+  return ['a', 'b', 'c', 'd'].map(
+    (s) => `https://${s}.basemaps.cartocdn.com/${variant}/{z}/{x}/{y}.png`,
+  );
+}
+
+/**
+ * The MapLibre style for the active color scheme: the custom override URL if one
+ * is configured, otherwise a tokenless CARTO raster basemap.
+ */
+export function mapStyle(scheme: ColorScheme): StyleSpecification | string {
+  if (MAP_STYLE_OVERRIDE.trim().length > 0) {
+    return MAP_STYLE_OVERRIDE;
+  }
+  return {
+    version: 8,
+    sources: {
+      carto: {
+        type: 'raster',
+        tiles: cartoTiles(scheme === 'dark' ? 'dark_all' : 'light_all'),
+        tileSize: 256,
+        attribution: CARTO_ATTRIBUTION,
+      },
+    },
+    layers: [{ id: 'carto', type: 'raster', source: 'carto' }],
+  };
 }
 
 /** Solid marker color for a water-quality status in the active scheme. */

@@ -1,25 +1,22 @@
 /**
- * Native implementation of the water-body map. Mapbox does not ship a
- * first-party React Native renderer that works in a managed Expo workflow
- * without custom native config, so this loads Mapbox GL JS inside a WebView and
- * renders the exact same style and markers as the web build. Marker taps are
- * relayed back to React Native via `postMessage`.
+ * Native implementation of the water-body map. It loads MapLibre GL JS (the
+ * open-source, tokenless fork of Mapbox GL JS) inside a WebView and renders the
+ * exact same style and markers as the web build. Marker taps are relayed back to
+ * React Native via `postMessage`.
  */
 import { useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
-import { MapPlaceholder } from './MapPlaceholder';
 import {
-  MAPBOX_TOKEN,
   NJ_CENTER,
-  hasMapboxToken,
+  mapStyle,
   markerColor,
   type WaterMapPoint,
   type WaterMapProps,
 } from './shared';
 
-const MAPBOX_GL_VERSION = 'v3.9.0';
+const MAPLIBRE_VERSION = '5.24.0';
 
 function pointFeatures(points: WaterMapPoint[], scheme: 'light' | 'dark') {
   return points.map((p) => ({
@@ -31,10 +28,6 @@ function pointFeatures(points: WaterMapPoint[], scheme: 'light' | 'dark') {
 
 function buildMapHtml(props: WaterMapProps): string {
   const { points, colorScheme, userLocation, focusPoint } = props;
-  const styleUrl =
-    colorScheme === 'dark'
-      ? 'mapbox://styles/mapbox/dark-v11'
-      : 'mapbox://styles/mapbox/light-v11';
   const ring = colorScheme === 'dark' ? '#0B1519' : '#FFFFFF';
   const center = focusPoint
     ? [focusPoint.longitude, focusPoint.latitude]
@@ -46,14 +39,15 @@ function buildMapHtml(props: WaterMapProps): string {
     features: pointFeatures(points, colorScheme),
   });
   const userJson = JSON.stringify(userLocation ?? null);
+  const styleJson = JSON.stringify(mapStyle(colorScheme));
 
   return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<link href="https://api.mapbox.com/mapbox-gl-js/${MAPBOX_GL_VERSION}/mapbox-gl.css" rel="stylesheet" />
-<script src="https://api.mapbox.com/mapbox-gl-js/${MAPBOX_GL_VERSION}/mapbox-gl.js"></script>
+<link href="https://unpkg.com/maplibre-gl@${MAPLIBRE_VERSION}/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl@${MAPLIBRE_VERSION}/dist/maplibre-gl.js"></script>
 <style>
   html, body, #map { margin: 0; padding: 0; height: 100%; width: 100%; }
   body { background: ${ring}; }
@@ -62,14 +56,13 @@ function buildMapHtml(props: WaterMapProps): string {
 <body>
 <div id="map"></div>
 <script>
-  mapboxgl.accessToken = ${JSON.stringify(MAPBOX_TOKEN)};
-  var map = new mapboxgl.Map({
+  var map = new maplibregl.Map({
     container: 'map',
-    style: ${JSON.stringify(styleUrl)},
+    style: ${styleJson},
     center: ${JSON.stringify(center)},
     zoom: ${zoom}
   });
-  map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'top-right');
+  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
 
   function post(msg) {
     if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify(msg));
@@ -147,10 +140,6 @@ export default function WaterMap(props: WaterMapProps) {
       // Ignore malformed messages from the page.
     }
   };
-
-  if (!hasMapboxToken()) {
-    return <MapPlaceholder />;
-  }
 
   return (
     <View style={styles.fill}>
